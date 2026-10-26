@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const {errorHandler} = require('../src/middlewares/errorHandler')
 
 const env = require('./config/env');
 const routes = require('./routes');
@@ -18,8 +19,6 @@ if (env.nodeEnv !== 'test') {
 
 app.use('/api', routes);
 
-// TEMPORAIRE (TOOL-12) : à remplacer par le middleware 404 et le middleware
-// global de gestion des erreurs du ticket TOOL-11.
 app.use((err, _req, res, _next) => {
   const status = err.statusCode || err.status || 500;
   if (status >= 500) logger.error('Erreur non gérée', err);
@@ -28,5 +27,6 @@ app.use((err, _req, res, _next) => {
     ...(err.details && { details: err.details }),
   });
 });
+app.use(errorHandler);
 
 module.exports = app;
