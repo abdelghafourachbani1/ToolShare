@@ -9,9 +9,16 @@ function findById(id) {
   return User.findById(id);
 }
 
-// Le mot de passe haché est exclu par défaut (select: false) : on le demande explicitement.
 function findByEmailWithPassword(email) {
   return User.findOne({ email: String(email).trim().toLowerCase() }).select('+motDePasse');
 }
 
-module.exports = { create, findById, findByEmailWithPassword };
+function findAll(filter = {}) {
+  return User.find(filter).sort({ createdAt: -1 });
+}
+
+function updateById(id, data) {
+  return User.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true });
+}
+
+module.exports = { create, findById, findByEmailWithPassword, findAll, updateById };
