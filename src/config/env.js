@@ -11,4 +11,9 @@ const env = {
 
 env.isProduction = env.nodeEnv === 'production';
 
+// Sans secret, impossible de signer ni de vérifier un JWT : on échoue dès le démarrage.
+if (!env.jwtSecret && env.nodeEnv !== 'test') {
+  throw new Error('JWT_SECRET est manquant : vérifiez votre fichier .env');
+}
+
 module.exports = env;
