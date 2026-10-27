@@ -20,8 +20,8 @@ const updateMateriel = async (id, data) => {
     return await Materiel.findByIdAndUpdate(id, data, { new: true, runValidators: true });
 };
 
-const updateStatut = async (id, statut) => {
-    return await Materiel.findByIdAndUpdate(id, { statut }, { new: true, runValidators: true });
+const deleteMateriel = async (id) => {
+    return await Materiel.findByIdAndDelete(id);
 };
 
 module.exports = {
@@ -30,5 +30,5 @@ module.exports = {
     findMaterielById,
     findMaterielByReference,
     updateMateriel,
-    updateStatut
+    deleteMateriel
 };
