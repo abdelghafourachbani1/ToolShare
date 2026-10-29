@@ -58,4 +58,4 @@ const getHistoriqueMouvements = async (req, res, next) => {
 module.exports = {
     getEmpruntsEnRetard,
     getHistoriqueMouvements
-};é
+};
