@@ -19,6 +19,6 @@ const findPage = (filter, { skip, limit }) =>
 const count = (filter) => Materiel.countDocuments(toQuery(filter));
 
 const updateById = (id, data) =>
-  Materiel.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true });
+  Materiel.findByIdAndUpdate(id, { $set: data }, { returnDocument: 'after', runValidators: true });
 
 module.exports = { findById, findPage, count, updateById };

@@ -18,7 +18,7 @@ function findAll(filter = {}) {
 }
 
 function updateById(id, data) {
-  return User.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true });
+  return User.findByIdAndUpdate(id, { $set: data }, { returnDocument: 'after', runValidators: true });
 }
 
 module.exports = { create, findById, findByEmailWithPassword, findAll, updateById };

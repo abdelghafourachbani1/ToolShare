@@ -8,6 +8,6 @@ const findAll = (filter = {}) =>
   Magasin.find(filter).collation({ locale: 'fr', strength: 2 }).sort({ nom: 1 });
 
 const updateById = (id, data) =>
-  Magasin.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true });
+  Magasin.findByIdAndUpdate(id, { $set: data }, { returnDocument: 'after', runValidators: true });
 
 module.exports = { create, findById, findAll, updateById };
