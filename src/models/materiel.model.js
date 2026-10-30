@@ -20,6 +20,8 @@ const materielSchema = new mongoose.Schema(
       required: [true, 'Le magasin est requis'],
       index: true,
     },
+    // Compteur incrémenté à chaque réservation : sert de verrou (voir lockForReservation).
+    verrouReservation: { type: Number, default: 0, select: false },
   },
   { timestamps: true, versionKey: false }
 );

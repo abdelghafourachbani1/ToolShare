@@ -18,7 +18,18 @@ const findPage = (filter, { skip, limit }) =>
 
 const count = (filter) => Materiel.countDocuments(toQuery(filter));
 
-const updateById = (id, data) =>
-  Materiel.findByIdAndUpdate(id, { $set: data }, { returnDocument: 'after', runValidators: true });
+// "session" est facultative : à renseigner pour participer à une transaction.
+const updateById = (id, data, session = null) =>
+  Materiel.findByIdAndUpdate(id, { $set: data }, { returnDocument: 'after', runValidators: true, session });
 
-module.exports = { findById, findPage, count, updateById };
+// Verrou par matériel : deux transactions qui modifient le même document entrent en conflit
+// d'écriture, MongoDB en annule une qui est rejouée. Les réservations d'un même matériel
+// passent donc l'une après l'autre ; celles de matériels différents ne se bloquent pas.
+const lockForReservation = (id, session) =>
+  Materiel.findOneAndUpdate(
+    { _id: id },
+    { $inc: { verrouReservation: 1 } },
+    { session, returnDocument: 'after', timestamps: false }
+  );
+
+module.exports = { findById, findPage, count, updateById, lockForReservation };

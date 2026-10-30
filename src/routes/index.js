@@ -6,6 +6,7 @@ const authRoutes = require('./auth.routes');
 const magasinRoutes = require('./magasin.routes');
 const userRoutes = require('./user.routes');
 const materielRoutes = require('./materiel.routes');
+const reservationRoutes = require('./reservation.routes');
 
 const router = Router();
 
@@ -15,8 +16,6 @@ router.use('/auth', authRoutes);
 router.use('/magasins', magasinRoutes);
 router.use('/users', userRoutes);
 router.use('/materiels', materielRoutes);
-
-// Routes à ajouter au fil des tickets :
-// router.use('/reservations', reservationRoutes);  // TOOL-24
+router.use('/reservations', reservationRoutes);
 
 module.exports = router;
