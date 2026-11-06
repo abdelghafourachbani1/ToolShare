@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 const env = require('./config/env');
 const routes = require('./routes');
 const logger = require('./utils/logger');
@@ -15,7 +16,7 @@ app.use(express.json());
 if (env.nodeEnv !== 'test') {
   app.use(morgan('dev', { skip: (req) => req.originalUrl === '/api/health' }));
 }
-
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api', routes);
 
 // TEMPORAIRE (TOOL-12) : à remplacer par le middleware 404 et le middleware

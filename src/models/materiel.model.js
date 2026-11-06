@@ -10,7 +10,7 @@ const materielSchema = new mongoose.Schema(
     },
     nom: { type: String, required: [true, 'Le nom est requis'], trim: true, maxlength: 100 },
     description: { type: String, trim: true, default: '', maxlength: 500 },
-    // disponible = false : indisponible à la réservation (panne, maintenance, endommagé).
+    // disponible = false : indisponible à la réservation (panne, maintenance, endommagé). 
     disponible: { type: Boolean, default: true },
     // actif = false : matériel retiré (désactivation), historique conservé.
     actif: { type: Boolean, default: true },
