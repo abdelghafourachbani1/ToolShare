@@ -1,4 +1,5 @@
 const reservationService = require('../services/reservation.service');
+const reservationQueryService = require('../services/reservation.query.service');
 
 async function creer(req, res) {
   const reservation = await reservationService.creer(req.user, req.body);
@@ -17,4 +18,8 @@ async function retourner(req, res) {
   res.json({ reservation: await reservationService.retourner(req.user, req.params.id, req.body) });
 }
 
-module.exports = { creer, verifierDisponibilite, remettre, retourner };
+async function lister(req, res) {
+  res.json(await reservationQueryService.lister(req.user, req.query));
+}
+
+module.exports = { creer, verifierDisponibilite, remettre, retourner, lister };

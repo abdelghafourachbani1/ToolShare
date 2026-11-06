@@ -32,4 +32,27 @@ const transition = (id, statutAttendu, changes, session = null) =>
     { session, returnDocument: 'after' }
   );
 
-module.exports = { create, findById, existsOverlap, existsEnCours, transition };
+// Traduit les critères métier en requête MongoDB.
+// "du" / "au" : on garde les réservations dont le créneau chevauche la période [du, au].
+function toQuery({ magasin, materiel, utilisateur, statut, du, au }) {
+  const query = {};
+  if (magasin) query.magasin = magasin;
+  if (materiel) query.materiel = materiel;
+  if (utilisateur) query.utilisateur = utilisateur;
+  if (statut) query.statut = statut;
+  if (au) query.dateDebut = { $lt: au };
+  if (du) query.dateFin = { $gt: du };
+  return query;
+}
+
+const findPage = (criteres, { skip, limit }) =>
+  Reservation.find(toQuery(criteres))
+    .sort({ dateDebut: -1, _id: -1 })
+    .skip(skip)
+    .limit(limit)
+    .populate('materiel', 'reference nom')
+    .populate('utilisateur', 'nom email');
+
+const count = (criteres) => Reservation.countDocuments(toQuery(criteres));
+
+module.exports = { create, findById, existsOverlap, existsEnCours, transition, findPage, count };

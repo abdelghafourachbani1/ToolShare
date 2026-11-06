@@ -8,6 +8,9 @@ const router = Router();
 
 router.use(authenticate);
 
+// Consultation : gestionnaire (son magasin) et Admin (tous les magasins)
+router.get('/', authorize(ROLES.ADMIN, ROLES.GESTIONNAIRE), reservationController.lister);
+
 // Réserver et vérifier une disponibilité : rôle UTILISATEUR
 router.get('/disponibilite', authorize(ROLES.UTILISATEUR), reservationController.verifierDisponibilite);
 router.post('/', authorize(ROLES.UTILISATEUR), reservationController.creer);

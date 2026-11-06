@@ -9,7 +9,8 @@
     "dev": "nodemon src/server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "demo": "node scripts/demo.js"
+    "demo": "node scripts/demo.js",
+    "demo:liste": "node scripts/demo-liste.js"
   },
   "repository": {
     "type": "git",
