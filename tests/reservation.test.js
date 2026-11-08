@@ -1,56 +1,20 @@
-const mongoose = require('mongoose');
-const Reservation = require('../models/reservation.model');
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { calculerDateFin, seChevauchent } = require('../src/utils/reservation');
 
-describe('Règles Métier - Réservations', () => {
+test('calculates reservation end from start and duration', () => {
+  const start = new Date('2026-11-01T10:00:00.000Z');
+  assert.equal(calculerDateFin(start, 5).toISOString(), '2026-11-01T15:00:00.000Z');
+});
 
-    test('Devrait calculer automatiquement la date de fin en fonction de la date de début et de la durée en heures', function () {
-        const dateDebut = new Date('2026-11-01T10:00:00.000Z');
-        const dureeEnHeures = 5;
+test('detects overlapping reservations', () => {
+  const existing = { dateDebut: new Date('2026-11-01T08:00:00Z'), dateFin: new Date('2026-11-01T12:00:00Z') };
+  const overlapping = { dateDebut: new Date('2026-11-01T10:00:00Z'), dateFin: new Date('2026-11-01T14:00:00Z') };
+  assert.equal(seChevauchent(existing, overlapping), true);
+});
 
-        const dureeEnMs = dureeEnHeures * 60 * 60 * 1000;
-        const dateFinCalculee = new Date(dateDebut.getTime() + dureeEnMs);
-
-        const expectedDateFin = new Date('2026-11-01T15:00:00.000Z');
-
-        expect(dateFinCalculee.toISOString()).toBe(expectedDateFin.toISOString());
-    });
-
-    test('Devrait détecter un chevauchement si une réservation tombe sur un créneau existant', () => {
-        const reservationExistante = {
-            dateDebut: new Date('2026-11-01T08:00:00.000Z'),
-            dateFin: new Date('2026-11-01T12:00:00.000Z')
-        };
-
-        const nouvelleReservation = {
-            dateDebut: new Date('2026-11-01T10:00:00.000Z'),
-            dateFin: new Date('2026-11-01T14:00:00.000Z')
-        };
-
-        const isOverlapping = (
-            nouvelleReservation.dateDebut < reservationExistante.dateFin &&
-            nouvelleReservation.dateFin > reservationExistante.dateDebut
-        );
-
-        expect(isOverlapping).toBe(true);
-    });
-
-    test('Ne devrait pas détecter de chevauchement si la nouvelle réservation commence exactement quand l’ancienne se termine', () => {
-        const reservationExistante = {
-            dateDebut: new Date('2026-11-01T08:00:00.000Z'),
-            dateFin: new Date('2026-11-01T12:00:00.000Z')
-        };
-
-        const nouvelleReservation = {
-            dateDebut: new Date('2026-11-01T12:00:00.000Z'),
-            dateFin: new Date('2026-11-01T16:00:00.000Z')
-        };
-
-        const isOverlapping = (
-            nouvelleReservation.dateDebut < reservationExistante.dateFin &&
-            nouvelleReservation.dateFin > reservationExistante.dateDebut
-        );
-
-        expect(isOverlapping).toBe(false);
-    });
-
+test('allows a reservation that starts when the previous one ends', () => {
+  const existing = { dateDebut: new Date('2026-11-01T08:00:00Z'), dateFin: new Date('2026-11-01T12:00:00Z') };
+  const contiguous = { dateDebut: new Date('2026-11-01T12:00:00Z'), dateFin: new Date('2026-11-01T16:00:00Z') };
+  assert.equal(seChevauchent(existing, contiguous), false);
 });

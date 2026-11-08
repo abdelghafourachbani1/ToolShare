@@ -6,14 +6,15 @@ const logger = require('./utils/logger');
 let server;
 
 async function start() {
+  // Start HTTP first so the health endpoint can report MongoDB failures too.
+  server = app.listen(env.port, () => {
+    logger.info(`ToolShare démarré sur le port ${env.port} (${env.nodeEnv})`);
+  });
+
   try {
     await connectDB();
-    server = app.listen(env.port, () => {
-      logger.info(`ToolShare démarré sur le port ${env.port} (${env.nodeEnv})`);
-    });
   } catch (err) {
-    logger.error('Impossible de démarrer le serveur (connexion MongoDB échouée ?)', err);
-    process.exit(1);
+    logger.error('Connexion MongoDB échouée; le serveur HTTP reste disponible', err);
   }
 }
 

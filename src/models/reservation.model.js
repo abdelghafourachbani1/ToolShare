@@ -1,71 +1,32 @@
 const mongoose = require('mongoose');
+const { STATUTS_RESERVATION, ETATS_MATERIEL } = require('../utils/constants');
 
-const reservationSchema = new mongoose.Schema({
-    utilisateurId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: [true, "L'utilisateur est obligatoire"]
+const reservationSchema = new mongoose.Schema(
+  {
+    utilisateur: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    materiel: { type: mongoose.Schema.Types.ObjectId, ref: 'Materiel', required: true },
+    magasin: { type: mongoose.Schema.Types.ObjectId, ref: 'Magasin', required: true, index: true },
+    dateDebut: { type: Date, required: true },
+    dureeHeures: {
+      type: Number,
+      required: true,
+      validate: { validator: (v) => Number.isFinite(v) && v > 0, message: 'La durée doit être strictement positive' },
     },
-    materielId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Materiel',
-        required: [true, "Le matériel est obligatoire"]
-    },
-    magasinId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Magasin',
-        required: [true, "Le magasin est obligatoire"]
-    },
-    dateDebut: {
-        type: Date,
-        required: [true, "La date de début est obligatoire"],
-        validate: {
-            validator: function(value) {
-                // La date de début ne peut pas être dans le passé (lors de la création)
-                if (this.isNew) {
-                    return value >= new Date();
-                }
-                return true;
-            },
-            message: "La date de début ne peut pas être dans le passé."
-        }
-    },
-    duree: {
-        type: Number,
-        required: [true, "La durée en heures est obligatoire"],
-        min: [0.1, "La durée doit être strictement positive"]
-    },
-    dateFin: {
-        type: Date
-    },
+    // Calculée à partir du début et de la durée, jamais saisie par le client.
+    dateFin: { type: Date, required: true },
     statut: {
-        type: String,
-        enum: ['confirmée', 'annulée', 'en cours', 'terminée'],
-        default: 'confirmée'
+      type: String,
+      enum: Object.values(STATUTS_RESERVATION),
+      default: STATUTS_RESERVATION.CONFIRMEE,
     },
-    dateReelleSortie: {
-        type: Date
-    },
-    dateReelleRetour: {
-        type: Date
-    },
-    etatRetour: {
-        type: String,
-        enum: ['bon', 'endommagé', null],
-        default: null
-    }
-}, {
-    timestamps: true
-});
+    dateSortieReelle: { type: Date, default: null },
+    dateRetourReelle: { type: Date, default: null },
+    etatConstate: { type: String, enum: [...Object.values(ETATS_MATERIEL), null], default: null },
+  },
+  { timestamps: true, versionKey: false }
+);
 
-// Middleware Mongoose (Pre-save) : Calcul automatique de la date de fin
-reservationSchema.pre('save', function(next) {
-    if (this.dateDebut && this.duree) {
-        // Calcul : dateFin = dateDebut + duree (convertie en millisecondes)
-        const dureeEnMs = this.duree * 60 * 60 * 1000;
-        this.dateFin = new Date(this.getTime ? this.dateDebut.getTime() + dureeEnMs : new Date(this.dateDebut).getTime() + dureeEnMs);
-    }
-    next();
-});
+// Sert la recherche de chevauchement sur un matériel.
+reservationSchema.index({ materiel: 1, statut: 1, dateDebut: 1, dateFin: 1 });
 
 module.exports = mongoose.model('Reservation', reservationSchema);

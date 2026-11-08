@@ -1,21 +1,24 @@
+const Reservation = require('../models/reservation.model');
+const { ROLES, STATUTS_RESERVATION } = require('../utils/constants');
+
 // 1. Identifier les emprunts en retard (pour les gestionnaires/admins)
 const getEmpruntsEnRetard = async (req, res, next) => {
     try {
         const maintenant = new Date();
-        let filtre = {
-            statut: 'en cours',
+        const filtre = {
+            statut: STATUTS_RESERVATION.EN_COURS,
             dateFin: { $lt: maintenant }
         };
 
         // Si c'est un gestionnaire, filtrer uniquement par son magasin
-        if (req.user.role === 'gestionnaire') {
-            filtre.magasinId = req.user.magasinId;
+        if (req.user.role === ROLES.GESTIONNAIRE) {
+            filtre.magasin = req.user.magasin;
         }
 
         const retards = await Reservation.find(filtre)
-            .populate('utilisateurId', 'nom email telephone')
-            .populate('materielId', 'reference nom')
-            .populate('magasinId', 'nom');
+            .populate('utilisateur', 'nom email')
+            .populate('materiel', 'reference nom')
+            .populate('magasin', 'nom');
 
         res.status(200).json({
             success: true,
@@ -31,18 +34,18 @@ const getEmpruntsEnRetard = async (req, res, next) => {
 // 2. Afficher l'historique des mouvements (sorties et retours de matériel)
 const getHistoriqueMouvements = async (req, res, next) => {
     try {
-        let filtre = {
-            statut: { $in: ['en cours', 'terminée', 'annulée'] }
+        const filtre = {
+            statut: { $in: [STATUTS_RESERVATION.EN_COURS, STATUTS_RESERVATION.TERMINEE, STATUTS_RESERVATION.ANNULEE] }
         };
 
-        if (req.user.role === 'gestionnaire') {
-            filtre.magasinId = req.user.magasinId;
+        if (req.user.role === ROLES.GESTIONNAIRE) {
+            filtre.magasin = req.user.magasin;
         }
 
         const historique = await Reservation.find(filtre)
-            .populate('utilisateurId', 'nom email')
-            .populate('materielId', 'reference nom')
-            .populate('magasinId', 'nom')
+            .populate('utilisateur', 'nom email')
+            .populate('materiel', 'reference nom')
+            .populate('magasin', 'nom')
             .sort({ updatedAt: -1 });
 
         res.status(200).json({

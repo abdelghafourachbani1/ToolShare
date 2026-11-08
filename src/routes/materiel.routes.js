@@ -1,12 +1,16 @@
-const express = require('express');
-const router = express.Router();
-const { verifyToken, checkRole, verifyManagerStore } = require('../middlewares/auth.middleware');
+const { Router } = require('express');
 const materielController = require('../controllers/materiel.controller');
+const authenticate = require('../middlewares/authenticate');
+const authorize = require('../middlewares/authorize');
+const { ROLES } = require('../utils/constants');
 
-router.post('/', verifyToken, checkRole('gestionnaire', 'admin'), verifyManagerStore, materielController.creerMateriel);
-router.get('/', verifyToken, materielController.getMateriels);
-router.get('/:id', verifyToken, materielController.getMaterielById);
-router.put('/:id', verifyToken, checkRole('gestionnaire', 'admin'), verifyManagerStore, materielController.updateMateriel);
-router.delete('/:id', verifyToken, checkRole('gestionnaire', 'admin'), verifyManagerStore, materielController.deleteMateriel);
+const router = Router();
+router.use(authenticate);
+
+router.post('/', authorize(ROLES.ADMIN, ROLES.GESTIONNAIRE), materielController.create);
+router.get('/', materielController.list);
+router.get('/:id', materielController.getById);
+router.patch('/:id/indisponible', authorize(ROLES.GESTIONNAIRE), materielController.declareUnavailable);
+router.patch('/:id/remise-en-service', authorize(ROLES.GESTIONNAIRE), materielController.putBackInService);
 
 module.exports = router;
