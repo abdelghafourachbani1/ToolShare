@@ -145,7 +145,31 @@ async function setDisponible(user, id, disponible) {
   return materielRepository.updateById(id, { disponible });
 }
 
+async function update(user, id, body = {}) {
+  assertValidId(id);
+  const existing = await materielRepository.findById(id);
+  if (!existing) throw new AppError(404, 'Matériel introuvable');
+  if (user.role !== ROLES.GESTIONNAIRE || !sameId(existing.magasin, user.magasin)) throw new AppError(403, 'Seul le gestionnaire de ce magasin peut modifier ce matériel');
+  const data = {};
+  for (const key of ['reference', 'nom', 'description']) {
+    if (body[key] === undefined) continue;
+    if (typeof body[key] !== 'string' || (key !== 'description' && !body[key].trim())) throw new AppError(400, `${key} invalide`);
+    data[key] = body[key].trim();
+  }
+  if (!Object.keys(data).length) throw new AppError(400, 'Aucun champ à modifier');
+  try { return await materielRepository.updateById(id, data); }
+  catch (err) { if (err.code === 11000) throw new AppError(409, 'Un matériel porte déjà cette référence'); throw err; }
+}
+
+async function deactivate(user, id) {
+  assertValidId(id);
+  const materiel = await materielRepository.findById(id);
+  if (!materiel) throw new AppError(404, 'Matériel introuvable');
+  if (user.role !== ROLES.GESTIONNAIRE || !sameId(materiel.magasin, user.magasin)) throw new AppError(403, 'Seul le gestionnaire de ce magasin peut désactiver ce matériel');
+  return materielRepository.updateById(id, { actif: false });
+}
+
 const declareUnavailable = (user, id) => setDisponible(user, id, false);
 const putBackInService = (user, id) => setDisponible(user, id, true);
 
-module.exports = { create, list, getById, declareUnavailable, putBackInService };
+module.exports = { create, list, getById, update, deactivate, declareUnavailable, putBackInService };

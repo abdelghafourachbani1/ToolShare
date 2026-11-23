@@ -26,6 +26,12 @@ const transition = (id, statutAttendu, changes, session = null) =>
     { session, returnDocument: 'after' }
   );
 
+const cancelOwn = (id, utilisateur, now = new Date()) => Reservation.findOneAndUpdate(
+  { _id: id, utilisateur, statut: STATUTS_RESERVATION.CONFIRMEE, dateDebut: { $gt: now } },
+  { $set: { statut: STATUTS_RESERVATION.ANNULEE } },
+  { returnDocument: 'after' }
+);
+
 function toQuery({ magasin, materiel, utilisateur, statut, du, au }) {
   const query = {};
   if (magasin) query.magasin = magasin;
@@ -43,8 +49,9 @@ const findPage = (criteres, { skip, limit }) =>
     .skip(skip)
     .limit(limit)
     .populate('materiel', 'reference nom')
-    .populate('utilisateur', 'nom email');
+    .populate('utilisateur', 'nom email')
+    .populate('magasin', 'nom');
 
 const count = (criteres) => Reservation.countDocuments(toQuery(criteres));
 
-module.exports = { create, findById, existsOverlap, existsEnCours, transition, findPage, count };
+module.exports = { create, findById, existsOverlap, existsEnCours, transition, cancelOwn, findPage, count };

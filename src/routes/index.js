@@ -7,6 +7,8 @@ const magasinRoutes = require('./magasin.routes');
 const userRoutes = require('./user.routes');
 const materielRoutes = require('./materiel.routes');
 const reservationRoutes = require('./reservation.routes');
+const adminRoutes = require('./admin.routes');
+const mouvementRoutes = require('./mouvement.routes');
 
 const router = Router();
 
@@ -17,5 +19,7 @@ router.use('/magasins', magasinRoutes);
 router.use('/users', userRoutes);
 router.use('/materiels', materielRoutes);
 router.use('/reservations', reservationRoutes);
+router.use('/admin', adminRoutes);
+router.use('/mouvements', mouvementRoutes);
 
 module.exports = router;

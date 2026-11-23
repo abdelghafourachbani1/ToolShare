@@ -22,4 +22,7 @@ async function lister(req, res) {
   res.json(await reservationQueryService.lister(req.user, req.query));
 }
 
-module.exports = { creer, verifierDisponibilite, remettre, retourner, lister };
+async function mesReservations(req, res) { res.json(await reservationQueryService.lister(req.user, req.query)); }
+async function annuler(req, res) { res.json({ reservation: await reservationQueryService.annuler(req.user, req.params.id) }); }
+
+module.exports = { creer, verifierDisponibilite, remettre, retourner, lister, mesReservations, annuler };

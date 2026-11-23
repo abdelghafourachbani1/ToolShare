@@ -149,7 +149,15 @@ async function setActif(id, actif) {
   return userRepository.updateById(id, { actif });
 }
 
+async function assignStore(id, magasin) {
+  const target = await findTargetOrFail(id);
+  if (target.role !== ROLES.GESTIONNAIRE) throw new AppError(400, 'Seul un gestionnaire peut être affecté à un magasin');
+  if (!isValidObjectId(magasin)) throw new AppError(400, 'magasin doit être un identifiant valide');
+  await assertMagasinUsable(magasin);
+  return userRepository.updateById(id, { magasin });
+}
+
 const deactivate = (id) => setActif(id, false);
 const activate = (id) => setActif(id, true);
 
-module.exports = { create, list, getById, update, deactivate, activate };
+module.exports = { create, list, getById, update, deactivate, activate, assignStore };

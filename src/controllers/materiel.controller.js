@@ -21,4 +21,7 @@ async function putBackInService(req, res) {
   res.json({ materiel: await materielService.putBackInService(req.user, req.params.id) });
 }
 
-module.exports = { create, list, getById, declareUnavailable, putBackInService };
+async function update(req, res) { res.json({ materiel: await materielService.update(req.user, req.params.id, req.body) }); }
+async function deactivate(req, res) { res.json({ materiel: await materielService.deactivate(req.user, req.params.id) }); }
+
+module.exports = { create, list, getById, update, deactivate, declareUnavailable, putBackInService };

@@ -10,6 +10,8 @@ router.use(authenticate);
 
 // Consultation : gestionnaire (son magasin) et Admin (tous les magasins)
 router.get('/', authorize(ROLES.ADMIN, ROLES.GESTIONNAIRE), reservationController.lister);
+router.get('/mes-reservations', authorize(ROLES.UTILISATEUR), reservationController.mesReservations);
+router.patch('/:id/annuler', authorize(ROLES.UTILISATEUR), reservationController.annuler);
 
 // Réserver et vérifier une disponibilité : rôle UTILISATEUR
 router.get('/disponibilite', authorize(ROLES.UTILISATEUR), reservationController.verifierDisponibilite);

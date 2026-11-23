@@ -77,6 +77,8 @@ router.post('/login', authController.login);
  *         description: Compte désactivé
  */
 router.get('/me', authenticate, authController.me);
+router.patch('/me', authenticate, require('../controllers/user.controller').updateProfile);
+router.patch('/me/mot-de-passe', authenticate, require('../controllers/user.controller').updatePassword);
 
 module.exports = router;
 

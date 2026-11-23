@@ -204,6 +204,26 @@ L'API comprend notamment les fonctionnalités d'authentification, de gestion des
 
 Pour consulter les routes exactes, se référer aux fichiers présents dans `src/routes/`.
 
+### Endpoints principaux
+
+| Méthode | Endpoint | Accès | Usage |
+|---|---|---|---|
+| GET / POST | `/api/installation/status`, `/api/installation` | Public | Vérifier l'installation et créer le premier Admin |
+| POST | `/api/auth/login` | Public | Connexion et obtention d'un JWT |
+| GET / PATCH | `/api/auth/me` | Connecté | Consulter ou modifier son profil |
+| PATCH | `/api/auth/me/mot-de-passe` | Connecté | Changer son mot de passe |
+| GET / POST / PATCH | `/api/magasins` | Lecture connectée, écriture Admin | Gérer les magasins |
+| GET / POST / PATCH | `/api/materiels` | Selon rôle et magasin | Consulter et gérer le matériel |
+| GET / POST / PATCH | `/api/reservations` | Selon rôle | Réserver, consulter, annuler, enregistrer remise et retour |
+| GET | `/api/reservations/mes-reservations` | Utilisateur | Consulter ses réservations (filtre `statut`, `du`, `au`) |
+| GET | `/api/mouvements`, `/api/mouvements/retards` | Admin, Gestionnaire | Historique et emprunts en retard |
+| POST / GET / PATCH | `/api/users` | Selon rôle | Créer des utilisateurs; gestion complète réservée à l'Admin |
+| PATCH | `/api/admin/gestionnaires/:id/magasin` | Admin | Affecter un gestionnaire à un magasin |
+
+Les listes de réservations et de matériels acceptent `page` et `limit`. La disponibilité se vérifie avec `GET /api/reservations/disponibilite?magasin=…&materiel=…&dateDebut=…&dureeHeures=…`. Les dates doivent être ISO 8601; les dates échangées sont interprétées selon leur fuseau (utiliser UTC côté frontend pour éviter toute ambiguïté).
+
+La spécification Swagger est exposée sur `/api-docs`.
+
 ## 9. Tests de l'API
 
 Les tests fonctionnels de l'API sont réalisés avec **Postman**.

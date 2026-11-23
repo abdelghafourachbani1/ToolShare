@@ -22,6 +22,7 @@ function parseDate(valeur, nom, errors) {
 // - GESTIONNAIRE : uniquement les réservations de SON magasin
 // - ADMIN : toutes les réservations
 async function lister(user, query = {}) {
+  if (user.role === ROLES.UTILISATEUR) query = { ...query, utilisateur: String(user._id) };
   // L'autorisation d'abord : un gestionnaire ne peut pas viser un autre magasin.
   if (user.role === ROLES.GESTIONNAIRE && query.magasin !== undefined && String(query.magasin) !== String(user.magasin)) {
     throw new AppError(403, "Vous n'avez accès qu'aux réservations de votre magasin");
@@ -30,6 +31,7 @@ async function lister(user, query = {}) {
   const pagination = parsePagination(query);
   const errors = [];
   const criteres = {};
+  if (user.role === ROLES.UTILISATEUR) criteres.utilisateur = user._id;
 
   if (query.materiel !== undefined) {
     if (isValidObjectId(query.materiel)) criteres.materiel = query.materiel;
@@ -60,4 +62,14 @@ async function lister(user, query = {}) {
   return { reservations, pagination: buildPagination(pagination, total) };
 }
 
-module.exports = { lister };
+async function annuler(user, id) {
+  if (!isValidObjectId(id)) throw new AppError(400, 'Identifiant de réservation invalide');
+  const reservation = await reservationRepository.cancelOwn(id, user._id);
+  if (reservation) return reservation;
+  const existing = await reservationRepository.findById(id);
+  if (!existing) throw new AppError(404, 'Réservation introuvable');
+  if (String(existing.utilisateur) !== String(user._id)) throw new AppError(403, 'Cette réservation appartient à un autre utilisateur');
+  throw new AppError(409, 'Seule une réservation confirmée peut être annulée avant son début');
+}
+
+module.exports = { lister, annuler };
